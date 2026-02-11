@@ -155,6 +155,16 @@ declare class Plyr {
   readonly fullscreen: Plyr.FullscreenControl;
 
   /**
+   * Access the overlay instance (video only)
+   */
+  readonly overlay?: Plyr.OverlayInstance;
+
+  /**
+   * Get the active frame ID from the overlay
+   */
+  readonly overlayFrameId: number | string | null;
+
+  /**
    * Start playback.
    * For HTML5 players, play() will return a Promise in some browsers - WebKit and Mozilla according to MDN at time of writing.
    */
@@ -216,6 +226,26 @@ declare class Plyr {
   setPreviewThumbnails(source: Plyr.PreviewThumbnailsOptions): void;
 
   /**
+   * Set overlay detection data for the current frame.
+   */
+  setOverlayFrame(frameId: number | string, detections: any[]): void;
+
+  /**
+   * Set a custom overlay renderer function.
+   */
+  setOverlayRenderer(callback: Plyr.OverlayRenderer | null): void;
+
+  /**
+   * Clear the overlay canvas and reset frame data.
+   */
+  clearOverlay(): void;
+
+  /**
+   * Enable the overlay (creates canvas if not already set up).
+   */
+  enableOverlay(): void;
+
+  /**
    * Toggle the controls (video only). Takes optional truthy value to force it on/off.
    */
   toggleControls(toggle: boolean): void;
@@ -270,6 +300,7 @@ declare namespace Plyr {
     controlshidden: PlyrEvent;
     controlsshown: PlyrEvent;
     ready: PlyrEvent;
+    overlayframe: PlyrEvent;
   };
   // For retrocompatibility, we keep StandardEvent
   type StandardEvent = keyof Plyr.StandardEventMap;
@@ -527,6 +558,11 @@ declare namespace Plyr {
      * Markers Options
      */
     markers?: MarkersOptions;
+
+    /**
+     * Overlay Options. Enables a canvas overlay on top of the video for rendering detections.
+     */
+    overlay?: OverlayOptions;
   }
 
   interface QualityOptions {
@@ -608,6 +644,44 @@ declare namespace Plyr {
     points: MarkersPoints[];
   }
 
+  interface OverlayOptions {
+    enabled?: boolean;
+    useVideoFrameCallback?: boolean;
+    zIndex?: number;
+  }
+
+  interface VideoRect {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+  }
+
+  type OverlayRenderer = (
+    ctx: CanvasRenderingContext2D,
+    frameData: any[] | null,
+    videoRect: VideoRect,
+    frameId: number | string | null,
+  ) => void;
+
+  interface OverlayInstance {
+    readonly canvas: HTMLCanvasElement | null;
+    readonly ctx: CanvasRenderingContext2D | null;
+    readonly enabled: boolean;
+    readonly ready: boolean;
+    readonly activeFrameId: number | string | null;
+    readonly frameData: any[] | null;
+
+    setup(): void;
+    resize(): void;
+    render(): void;
+    clear(): void;
+    destroy(): void;
+    setFrameData(frameId: number | string, detections: any[]): void;
+    setRenderer(callback: OverlayRenderer | null): void;
+    getVideoRect(): VideoRect;
+  }
+
   export interface Elements {
     buttons: {
       airplay?: HTMLButtonElement;
@@ -626,6 +700,7 @@ declare namespace Plyr {
     container: HTMLElement | null;
     controls: HTMLElement | null;
     fullscreen: HTMLElement | null;
+    overlay: HTMLCanvasElement | null;
     wrapper: HTMLElement | null;
   }
 

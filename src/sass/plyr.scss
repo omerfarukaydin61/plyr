@@ -41,6 +41,7 @@ $css-vars-use-native: true;
 @import 'types/video';
 @import 'states/fullscreen';
 @import 'plugins/ads';
+@import 'plugins/overlay';
 @import 'plugins/preview-thumbnails/index';
 @import 'utils/animation';
 @import 'utils/hidden';

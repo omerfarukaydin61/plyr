@@ -5,6 +5,7 @@
 import { providers } from './config/types';
 import html5 from './html5';
 import media from './media';
+import Overlay from './plugins/overlay';
 import PreviewThumbnails from './plugins/preview-thumbnails';
 import support from './support';
 import ui from './ui';
@@ -110,6 +111,14 @@ const source = {
 
       // Set up from scratch
       media.setup.call(this);
+
+      // Re-initialize overlay after source change (video only)
+      if (this.isVideo && this.config.overlay.enabled) {
+        if (this.overlay) {
+          this.overlay.destroy();
+        }
+        this.overlay = new Overlay(this);
+      }
 
       // HTML5 stuff
       if (this.isHTML5) {

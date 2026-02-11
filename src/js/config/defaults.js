@@ -273,6 +273,9 @@ const defaults = {
     // Quality
     'qualitychange',
 
+    // Overlay
+    'overlayframe',
+
     // Ads
     'adsloaded',
     'adscontentpause',
@@ -379,6 +382,9 @@ const defaults = {
       supported: 'plyr--airplay-supported',
       active: 'plyr--airplay-active',
     },
+    overlay: {
+      canvas: 'plyr__overlay',
+    },
     previewThumbnails: {
       // Tooltip thumbs
       thumbContainer: 'plyr__preview-thumb',
@@ -453,6 +459,13 @@ const defaults = {
   markers: {
     enabled: false,
     points: [],
+  },
+
+  // Overlay canvas (for rendering detection overlays on top of video)
+  overlay: {
+    enabled: false,
+    useVideoFrameCallback: true,
+    zIndex: 3,
   },
 };
 

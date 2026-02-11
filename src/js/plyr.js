@@ -16,6 +16,7 @@ import html5 from './html5';
 import Listeners from './listeners';
 import media from './media';
 import Ads from './plugins/ads';
+import Overlay from './plugins/overlay';
 import PreviewThumbnails from './plugins/preview-thumbnails';
 import source from './source';
 import Storage from './storage';
@@ -281,6 +282,11 @@ class Plyr {
 
     // Setup media
     media.setup.call(this);
+
+    // Setup overlay (video only)
+    if (this.isVideo) {
+      this.overlay = new Overlay(this);
+    }
 
     // Listen for events if debugging
     if (this.config.debug) {
@@ -1052,6 +1058,56 @@ class Plyr {
     }
   }
 
+  // ---------------------------------------
+  // Overlay API
+  // ---------------------------------------
+
+  /**
+   * Set overlay detection data for the current frame
+   * @param {number|string} frameId - Frame identifier
+   * @param {Array} detections - Array of detection objects
+   */
+  setOverlayFrame(frameId, detections) {
+    if (this.overlay && this.overlay.ready) {
+      this.overlay.setFrameData(frameId, detections);
+    }
+  }
+
+  /**
+   * Set a custom overlay renderer function
+   * @param {Function} callback - (ctx, frameData, videoRect, frameId) => {}
+   */
+  setOverlayRenderer(callback) {
+    if (this.overlay) {
+      this.overlay.setRenderer(callback);
+    }
+  }
+
+  /**
+   * Clear the overlay canvas
+   */
+  clearOverlay() {
+    if (this.overlay) {
+      this.overlay.clear();
+    }
+  }
+
+  /**
+   * Enable the overlay (creates canvas if not already set up)
+   */
+  enableOverlay() {
+    if (this.overlay && !this.overlay.ready) {
+      this.overlay.setup();
+    }
+  }
+
+  /**
+   * Get the active frame ID from the overlay
+   */
+  get overlayFrameId() {
+    return this.overlay ? this.overlay.activeFrameId : null;
+  }
+
   /**
    * Trigger the airplay dialog
    * TODO: update player with state, support, enabled
@@ -1197,6 +1253,12 @@ class Plyr {
 
     // Stop playback
     this.stop();
+
+    // Destroy overlay
+    if (this.overlay) {
+      this.overlay.destroy();
+      this.overlay = null;
+    }
 
     // Clear timeouts
     clearTimeout(this.timers.loading);
